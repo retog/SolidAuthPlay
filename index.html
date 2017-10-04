@@ -10,8 +10,23 @@ and open the template in the editor.
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="solid-auth-client.bundle.js"></script>
+        <script src="https://solid.github.io/releases/rdflib.js/rdflib-0.16.2.min.js"></script>
         <script>
             var webId = null;
+            var vocab = {
+                schema : function(suffix) {
+                    return $rdf.sym("http://schema.org/"+suffix);
+                },
+                rdf : function(suffix) {
+                    return $rdf.sym("http://www.w3.org/1999/02/22-rdf-syntax-ns#"+suffix);
+                },
+                solid : function(suffix) {
+                    return $rdf.sym("http://www.w3.org/ns/solid/terms#"+suffix);
+                },
+                space : function(suffix) {
+                    return $rdf.sym("http://www.w3.org/ns/pim/space#"+suffix);
+                }
+            };
             var absolutePath = function(href) {
                 var link = document.createElement("a");
                 link.href = href;
@@ -20,9 +35,29 @@ and open the template in the editor.
             var login = function() {
                 var authPromise = SolidAuthClient.popupLogin({ popupUri: absolutePath('popup.html') });
                 authPromise.then(function(auth) {
-                    alert("Athenticated with WebId: "+auth.webId+"\n\n(No more action for now)");
+                    var user = $rdf.sym(auth.webId);
+                    
+                    var graph = $rdf.graph();
+                    var fetcher = new $rdf.Fetcher(graph);
+                    fetcher.fetch(auth.webId)
+                      .then(function (response) {
+                        var storage = graph.any(user, vocab.space('storage'));
+                        alert("Loading "+storage+" with SolidAuthClient.fetch");
+                        SolidAuthClient.fetch(storage.value).then(function (response) {
+                                console.log(response);
+                        });
+                        alert("Loading "+storage+" with $rdf.Fetcher");
+                        var ldpRoot = $rdf.graph();
+                        var fetcher = new $rdf.Fetcher(ldpRoot);
+                        fetcher.fetch(storage)
+                            .then(function (response) {
+                                console.log(response);
+                                console.log(ldpRoot.toString());
+                        })
+                      });
                 })
             }
+            
         </script>
     </head>
     <body>
