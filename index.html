@@ -39,17 +39,20 @@ and open the template in the editor.
                     var user = $rdf.sym(auth.webId);
                     
                     var graph = $rdf.graph();
-                    var fetcher = new $rdf.Fetcher(graph);
+                    var fetcher = new $rdf.Fetcher(graph, { fetch: SolidAuthClient.fetch } );
                     fetcher.fetch(auth.webId)
                       .then(function (response) {
                         var storage = graph.any(user, vocab.space('storage'));
-                        alert("Loading "+storage+" with SolidAuthClient.fetch");
-                        SolidAuthClient.fetch(storage.value).then(function (response) {
+                        console.log("Loading "+storage+" will dump to console");
+                        /*SolidAuthClient.fetch(storage.value).then(function (response) {
                                 console.log(response);
-                        });
-                        alert("Loading "+storage+" with $rdf.Fetcher");
+                                return response.blob();
+                        }).then(function(blob) {
+                            console.log(blob);
+                        });*/
+                        console.log("Loading "+storage+" with $rdf.Fetcher");
                         var ldpRoot = $rdf.graph();
-                        var fetcher = new $rdf.Fetcher(ldpRoot);
+                        var fetcher = new $rdf.Fetcher(ldpRoot, { fetch: SolidAuthClient.fetch } );
                         fetcher.fetch(storage)
                             .then(function (response) {
                                 console.log(response);
