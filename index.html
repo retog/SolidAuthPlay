@@ -33,6 +33,7 @@ and open the template in the editor.
                 return (link.protocol+"//"+link.host+link.pathname+link.search+link.hash);
             }
             var login = function() {
+                localStorage.removeItem("solid-auth-client")
                 var authPromise = SolidAuthClient.popupLogin({ popupUri: absolutePath('popup.html') });
                 authPromise.then(function(auth) {
                     var user = $rdf.sym(auth.webId);
