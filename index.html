@@ -25,6 +25,9 @@ and open the template in the editor.
                 },
                 space : function(suffix) {
                     return $rdf.sym("http://www.w3.org/ns/pim/space#"+suffix);
+                }, 
+                foaf : function(suffix) {
+                    return $rdf.sym("http://xmlns.com/foaf/0.1/"+suffix);
                 }
             };
             var absolutePath = function(href) {
@@ -38,6 +41,14 @@ and open the template in the editor.
                 authPromise.then(function(auth) {
                     webId = auth.webId;
                     alert("Succesfully logged in "+webId);
+                    var user = $rdf.sym(webId);
+                    var graph = $rdf.graph();
+                    var fetcher = new $rdf.Fetcher(graph, { fetch: SolidAuthClient.fetch } );
+                    fetcher.fetch(webId)
+                          .then(function (response) {
+                            var name = graph.any(user, vocab.foaf('name'))
+                            alert("Hello "+name);
+                    })
                 })
             }
             
