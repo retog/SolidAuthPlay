@@ -36,36 +36,38 @@ and open the template in the editor.
                 localStorage.removeItem("solid-auth-client")
                 var authPromise = SolidAuthClient.popupLogin({ popupUri: absolutePath('popup.html') });
                 authPromise.then(function(auth) {
-                    var user = $rdf.sym(auth.webId);
-                    
-                    var graph = $rdf.graph();
-                    var fetcher = new $rdf.Fetcher(graph, { fetch: SolidAuthClient.fetch } );
-                    fetcher.fetch(auth.webId)
-                      .then(function (response) {
-                        var storage = graph.any(user, vocab.space('storage'));
-                        console.log("Loading "+storage+" will dump to console");
-                        /*SolidAuthClient.fetch(storage.value).then(function (response) {
-                                console.log(response);
-                                return response.blob();
-                        }).then(function(blob) {
-                            console.log(blob);
-                        });*/
-                        console.log("Loading "+storage+" with $rdf.Fetcher");
-                        var ldpRoot = $rdf.graph();
-                        var fetcher = new $rdf.Fetcher(ldpRoot, { fetch: SolidAuthClient.fetch } );
-                        fetcher.fetch(storage)
-                            .then(function (response) {
-                                console.log(response);
-                                console.log(ldpRoot.toString());
-                        })
-                      });
+                    webId = auth.webId;
+                    alert("Succesfully logged in "+webId);
                 })
             }
             
+            var loadStorage = function() {
+                if (!webId) {
+                    alert("No WebID available, login first");
+                    return;
+                }
+                var user = $rdf.sym(webId);
+                var graph = $rdf.graph();
+                var fetcher = new $rdf.Fetcher(graph, { fetch: SolidAuthClient.fetch } );
+                fetcher.fetch(webId)
+                      .then(function (response) {
+                        var storage = graph.any(user, vocab.space('storage'));
+                        console.log("Loading "+storage+" will dump to console");
+                        var storageRootGraph = $rdf.graph();
+                        var fetcher = new $rdf.Fetcher(storageRootGraph, { fetch: SolidAuthClient.fetch } );
+                        fetcher.fetch(storage)
+                            .then(function (response) {
+                                alert("Got "+storageRootGraph.length+" triples");
+                                console.log(response);
+                                console.log(storageRootGraph.toString());
+                        })
+                      });
+            }
         </script>
     </head>
     <body>
-        <div>Login for all the action!</div>
+        <h1>Solid-Auth Demo</h1>
         <button onclick="login()">Login</button>
+        <button onclick="loadStorage()">Get Storage</button>
     </body>
 </html>
